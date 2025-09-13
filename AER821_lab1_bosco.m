@@ -1,3 +1,10 @@
+% AER821 Lab 1
+% System - Earth-Luna (moon) 
+% Lagrange point 1
+% Aidan Walpole
+% Bosco Mak 501104446
+% Stefan Aquino
+
 %Values taken from textbook
 
 % Mass values, kg
@@ -17,4 +24,8 @@ mu_moon = G*M_moon;
 pi_earth = M_earth / M_total;
 pi_moon = M_moon / M_total;
 
+% distances in inertial frame
 r_12 = 3.844*10^5;% distance between earth and moon (from CoM), km
+
+d_earth = -pi_moon * r_12; % distance from origin of inertial frame to earth
+d_moon = pi_earth * r_12; %distance from origin of inertial frame to moon
