@@ -113,3 +113,7 @@ function dydt = crtbp_inertial(t, y, Mu_Earth, Mu_Luna, d_Earth, d_Luna, Omega)
     dydt = [v; a];
 
 end
+
+
+%% Question 2
+
