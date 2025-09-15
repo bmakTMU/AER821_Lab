@@ -97,7 +97,10 @@ hold off;
 
 r_R = C_RI * r_I; % position vector
 r_Rv = C_RI * (v + Omega * r_I); % velocity
-r_Ra = C_RI * (a + 2*Omega * v + Omega * r_I + Omega*Omega * r_I); % acceleration
+r_Ra = C_RI * (a + 2*Omega * v  + Omega*Omega * r_I); % acceleration
+
+%% Question 3
+
 
 
 
