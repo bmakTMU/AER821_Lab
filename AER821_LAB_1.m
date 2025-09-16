@@ -1,4 +1,4 @@
-clear; clc; close all;
+clear; clc; close all; 
 
 % Constants
 G = 6.6742e-11; % gravitational constant [m^3/kg/s^2]
@@ -18,31 +18,31 @@ d_Luna   =  Pi_Earth * r_12; % Moon position offset [m]
 
 %% Question 1
 
-Omega = sqrt(G * (M_Earth + M_Luna) / r_12^3); % angular velocity [1/s]
+% Motion and period
+Omega = sqrt(G * (M_Earth + M_Luna) / r_12^3); % angular velocity [rad/s]
 T_sys = 2 * pi / Omega; % lunar period [s]
 
-% Spacecraft initial conditions
-Re = 6378e3; % Earth radius [m]
-h  = 35786e3; % altitude of spacecraft [m] (GEO)
+% Lagrange Point L1
+mu = M_Luna/(M_Earth + M_Luna);
+d_from_moon = r_12*(mu/3)^(1/3);
+x_guess = d_Luna - d_from_moon;
 
-% At this altitude, a satellites orbital period matches Earth s rotation (24 hours)
+L1_fun = @(x) (Mu_Earth/(abs(x - d_Earth)^2) - Mu_Luna/(abs(d_Luna - x)^2) - Omega^2 * x);
+xL1 = fzero(L1_fun, x_guess);
 
-r_sc_mag = Re + h; % distance from Earth center [m]
+% Initial position at L1
+r0x = xL1; 
+r0y = 0;
+r0z = 0;
 
-% Start position: spacecraft on +x axis
-r0x = d_Earth + r_sc_mag; % [m]
-r0y = 0; % [m]
-r0z = 0; % [m]
+% Initial velocity at L1
+v0x = 0;
+v0y = Omega * xL1;
+v0z = 0;
 
-% Start velocity: circular orbit speed, in +y
-v0x = 0; % [m/s]
-v0y = sqrt(Mu_Earth / r_sc_mag); % [m/s]
-v0z = 0;% [m/s]
-
-r0 = [r0x; r0y; r0z];  % make position vector [m]
-v0 = [v0x; v0y; v0z];  % make velocity vector [m/s]
-
-% Initial state
+% State vector
+r0 = [r0x; r0y; r0z];
+v0 = [v0x; v0y; v0z];
 y0 = [r0; v0];
 
 % Time span: one lunar cycle
@@ -51,23 +51,26 @@ tspan = [0 T_sys];
 % Solve system
 [t, y] = ode113(@(t,y) crtbp_inertial(t, y, Mu_Earth, Mu_Luna, d_Earth, d_Luna, Omega), tspan, y0);
 
-% Earth and Moon positions
-R_E = [d_Earth * cos(Omega * t), d_Earth * sin(Omega * t), zeros(size(t))];
-R_M = [d_Luna  * cos(Omega * t), d_Luna  * sin(Omega * t), zeros(size(t))];
+% Smooth plot lines
+tt = linspace(0, T_sys, 2000).';
+R_E = [d_Earth * cos(Omega * tt), d_Earth * sin(Omega * tt)];
+R_M = [d_Luna * cos(Omega * tt), d_Luna * sin(Omega * tt)];
 
-% Spacecraft relative to Earth (for orbit view)
-rel = y(:,1:2) - R_E(:,1:2);
-
-% Plot: Inertial (barycenter frame)
+% Inertial-frame plot
 figure;
 hold on;
-plot(R_E(:,1), R_E(:,2), 'b', 'LineWidth', 2); % Earth
-plot(R_M(:,1), R_M(:,2), 'k', 'LineWidth', 2); % Moon
-plot(y(:,1), y(:,2), 'r'); % spacecraft
-legend('Earth','Moon','Spacecraft');
+plot(0,0,'k+','LineWidth',1.5); % barycenter
+plot(R_E(:,1), R_E(:,2), 'b','LineWidth',1.5); % Earth path
+plot(R_M(:,1), R_M(:,2), 'k','LineWidth',1.5); % Moon path
+plot(y(:,1), y(:,2), 'r','LineWidth',1.2); % spacecraft path
+plot(d_Earth,0,'bo','MarkerFaceColor','b'); % Earth at t0
+plot(d_Luna, 0,'ko','MarkerFaceColor','k'); % Moon at t0
+plot(xL1,0,'ro','MarkerFaceColor','r'); % L1 
+plot(y(end,1),y(end,2),'rx','LineWidth',2,'MarkerSize',8); % spacecraft end
+legend('Barycenter','Earth orbit','Moon orbit','Spacecraft','Earth(t0)','Moon(t0)','L1','Spacecraft end');
 xlabel('X [m]'); ylabel('Y [m]');
-title('CRTBP Inertial Frame - One Lunar Period');
-axis equal; grid on;
+title('CRTBP – One Lunar Period (Start at L1)');
+axis equal; grid on; 
 hold off;
 
 % Run Simulink model
@@ -91,42 +94,25 @@ title('Spacecraft trajectory from Simulink');
 axis equal; grid on;
 hold off;
 
-%% Question 2
-
-% angle @ specific times
-
-r_R = C_RI * r_I; % position vector
-r_Rv = C_RI * (v + Omega * r_I); % velocity
-r_Ra = C_RI * (a + 2*Omega * v  + Omega*Omega * r_I); % acceleration
-
-%% Question 3
-
-
-
-
-%% Function: Equations of motion
-
+% Function: Equations of motion
 function dydt = crtbp_inertial(t, y, Mu_Earth, Mu_Luna, d_Earth, d_Luna, Omega)
 
     % Position and velocity
-    r = y(1:3); % elements 1–3 = [rx, ry, rz], spacecraft position [m]
-    v = y(4:6); % elements 4–6 = [vx, vy, vz], spacecraft velocity [m/s]
+    r = y(1:3); % spacecraft position [m]
+    v = y(4:6); % spacecraft velocity [m/s]
 
     % Earth and Moon positions
-    R_Earth = [d_Earth * cos(Omega * t); d_Earth * sin(Omega * t); 0]; % [m]
-    R_Luna  = [d_Luna  * cos(Omega * t); d_Luna  * sin(Omega * t); 0]; % [m]
+    R_Earth = [d_Earth * cos(Omega * t); d_Earth * sin(Omega * t); 0]; 
+    R_Luna  = [d_Luna  * cos(Omega * t); d_Luna  * sin(Omega * t); 0]; 
 
     % Relative positions
-    r1 = r - R_Earth; % vector Earth to spacecraft [m]
-    r2 = r - R_Luna; % vector Moon to spacecraft [m]
+    r1 = r - R_Earth; 
+    r2 = r - R_Luna;  
 
     % Accelerations
-    a = -Mu_Earth * r1 / norm(r1)^3 - Mu_Luna * r2 / norm(r2)^3; % acceleration [m/s^2]
+    a = -Mu_Earth * r1 / norm(r1)^3 - Mu_Luna * r2 / norm(r2)^3; 
 
     % Derivative
     dydt = [v; a];
 
 end
-
-
-
