@@ -68,9 +68,11 @@ plot(d_Luna, 0,'ko','MarkerFaceColor','k'); % Moon at t0
 plot(xL1,0,'ro','MarkerFaceColor','r'); % L1 
 plot(y(end,1),y(end,2),'rx','LineWidth',2,'MarkerSize',8); % spacecraft end
 legend('Barycenter','Earth orbit','Moon orbit','Spacecraft','Earth(t0)','Moon(t0)','L1','Spacecraft end');
-xlabel('X [m]'); ylabel('Y [m]');
+xlabel('X [m]'); 
+ylabel('Y [m]');
 title('CRTBP – One Lunar Period (Start at L1)');
-axis equal; grid on; 
+axis equal; 
+grid on; 
 hold off;
 
 % Run Simulink model
@@ -91,9 +93,63 @@ hold on;
 plot(x_sim, y_sim, 'r');
 xlabel('X [m]'); ylabel('Y [m]');
 title('Spacecraft trajectory from Simulink');
-axis equal; grid on;
+axis equal; 
+grid on;
 hold off;
 
+%% Plot in Rotating Frame
+
+% Redefine the time of the system to better display the orbit of the
+% spacecraft in the rotating frame
+
+tspan = tspan * 5;                                                                                    % Changes the time span to four lunar cycles
+[t, y] = ode113(@(t,y) crtbp_inertial(t, y, Mu_Earth, Mu_Luna, d_Earth, d_Luna, Omega), tspan, y0);   % Reruns the derivation of the x and y coordinates using the 5 cycles span
+
+% Define spacecraft position arrays and preallocate
+
+X_SC_Rot = zeros(length(t),1);          % Preallocate for x components of the spacecraft in the rotating frame
+Y_SC_Rot= zeros(length(t),1);           % Preallocate for y components of the spacecraft in the rotating frame
+
+% Creates a Loop to Transform The Inertial Frame Spacecraft Positions to the rotated frame
+
+for i = 1:length(t)                     % Creates the index
+    theta = Omega * t(i);               % Determines how much the system has rotated, angular velocity multiplied by time
+
+    % Creates the transformation matrix
+
+    R = [cos(theta), sin(theta);
+        -sin(theta), cos(theta)];
+    
+    SC_Pos_Inertial = y(i,1:2)';        % Selects the x and y coordinates for the spacecraft in the inertial frame at time equal to index (i), and stores it as array, then transposes for later algebra
+    SC_Pos_Rot = R * SC_Pos_Inertial;   % Transfroms these coordinates through multiplication with the matrix and stores as new array
+    
+    X_SC_Rot(i) = SC_Pos_Rot(1);        % Creates list of x coordinates post rotation
+    Y_SC_Rot(i) = SC_Pos_Rot(2);        % Creates list of y coordinates post rotation
+
+end
+
+% Since in the rotating from, the earth and the moon do not move, they are fixed at their initial position, this is performed below.
+
+E_Stationary = [d_Earth; 0];     % Earth's stationary position
+Luna_Stationary  = [d_Luna;  0]; % Moon's stationary position
+
+% Plotting the system
+
+figure;
+hold on;
+plot(E_Stationary(1), E_Stationary(2), 'bo', 'MarkerFaceColor', 'b');       % Plots the Earth
+plot(Luna_Stationary(1), Luna_Stationary(2), 'ko', 'MarkerFaceColor', 'k'); % Plots the Moon
+plot(X_SC_Rot, Y_SC_Rot, 'r','LineWidth',1.2);                              % Plots the spacecraft's path
+plot(0, 0, 'k+');                                                           % Plots the Barycenter of the system
+xlabel('X [m]');                                                            % Creates the x axis label
+ylabel('Y [m]');                                                            % Creates the y axis label
+legend('Earth', 'Moon', 'Spacecraft', 'Barycenter');                        % Creates the legend
+title('System Viewed Through The Rotating Frame');                          % Creates the title
+grid on;                                                                    % Turns on the background grid on the plot
+axis equal;                                                                 % Sets the units of both axis equal to eachother
+hold off;
+
+%%
 % Function: Equations of motion
 function dydt = crtbp_inertial(t, y, Mu_Earth, Mu_Luna, d_Earth, d_Luna, Omega)
 
