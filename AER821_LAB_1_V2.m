@@ -138,6 +138,36 @@ grid on;                                                                    % Tu
 axis equal;                                                                 % Sets the units of both axis equal to eachother
 hold off;
 
+
+%% Question 3 - Scalar equations
+
+r_earth = r0x - d_Earth; % initial distance from s/c to Earth
+r_moon = d_Luna-r0x; % initial distance from s/c to Moon
+
+
+
+Q3 = sim('Question3.slx', 'StopTime', num2str(5*T_sys));
+
+posQ3 = Q3.posQ3.Data;
+velQ3 = Q3.velQ3.Data;
+
+figure;
+hold on;
+plot(E_Stationary(1), E_Stationary(2), 'bo', 'MarkerFaceColor', 'b');       % Plots the Earth
+plot(Luna_Stationary(1), Luna_Stationary(2), 'ko', 'MarkerFaceColor', 'k'); % Plots the Moon
+
+plot(posQ3(:,1), posQ3(:,2), 'r', 'LineWidth', 1.2);                        % Plot scalar eqns
+
+plot(0,0, 'k+');                                                            % Barycenter
+xlabel('X [m]');                                                            % Creates the x axis label
+ylabel('Y [m]');                                                            % Creates the y axis label
+legend('Earth', 'Moon', 'Spacecraft', 'Barycenter');                        % Creates the legend
+title('Scalar Equations in the Rotating Frame');                            % Creates the title
+grid on;                                                                    % Turns on the background grid on the plot
+axis equal;                                                                 % Sets the units of both axis equal to eachother
+hold off;
+
+
 %% Functions
 
 % Function: Equations of motion
@@ -160,5 +190,33 @@ function dydt = crtbp_inertial(t, y, Mu_Earth, Mu_Luna, d_Earth, d_Luna, Omega)
 
     % Derivative
     dydt = [v; a];
+
+end
+
+% Scalar Eqns of Motion
+function a = accel(velocity, position, r_moon, d_Luna, Mu_Luna, r_earth, d_Earth, Mu_Earth, Omega)
+
+    % Define variables
+    
+    % position
+    x = position(1);
+    y = position(2);
+    z = position(3);
+    
+    % velocity
+    x_v = velocity(1);
+    y_v = velocity(2);
+
+
+     
+    % Function
+    
+    ax = 2*Omega*y_v + (Omega^2)*x - (Mu_Earth / r_earth^3)*(x-d_Earth) - (Mu_Luna / r_moon^3)*(x-d_Luna);
+    
+    ay = -(Mu_Earth / r_earth^3)*y - (Mu_Luna / r_moon^3)*y + (Omega^2)*y - 2*Omega*x_v;
+    
+    az = -(Mu_Earth / r_earth^3)*z - (Mu_Luna / r_moon^3)*z;
+    
+    a = [ax ay az];
 
 end
