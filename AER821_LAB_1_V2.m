@@ -102,12 +102,11 @@ Y_SC_Rot= zeros(length(t),1);           % Preallocate for y components of the sp
 % Creates a Loop to Transform The Inertial Frame Spacecraft Positions to the rotated frame
 
 for i = 1:length(t)                     % Creates the index
-    theta = Omega * t(i);               % Determines how much the system has rotated, angular velocity multiplied by time
 
     % Creates the transformation matrix
 
-    R = [cos(theta), sin(theta);
-        -sin(theta), cos(theta)];
+    R = [cos(Omega * t(i)), sin(Omega * t(i));
+        -sin(Omega * t(i)), cos(Omega * t(i))];
     
     SC_Pos_Inertial = y(i,1:2)';        % Selects the x and y coordinates for the spacecraft in the inertial frame at time equal to index (i), and stores it as array, then transposes for later algebra
     SC_Pos_Rot = R * SC_Pos_Inertial;   % Transfroms these coordinates through multiplication with the matrix and stores as new array
@@ -133,12 +132,34 @@ plot(0, 0, 'k+');                                                           % Pl
 xlabel('X [m]');                                                            % Creates the x axis label
 ylabel('Y [m]');                                                            % Creates the y axis label
 legend('Earth', 'Moon', 'Spacecraft', 'Barycenter');                        % Creates the legend
-title('Q2: System Viewed Through The Rotating Frame');                          % Creates the title
+title('Q2: System Viewed Through The Rotating Frame');                      % Creates the title
 grid on;                                                                    % Turns on the background grid on the plot
 axis equal;                                                                 % Sets the units of both axis equal to eachother
 hold off;
 
+% Discussion Question 2
+% Do these match your expectations? Discuss your results. You may need to 
+% adjust the Simulink model to get your results to match expectations. Discuss your findings during
+% this process
 
+% Answer
+% These results align with expectations. Initially, the spacecraft's trajectory 
+% shows it orbiting the Earth, similar to what is observed in the inertial frame. 
+% In this plot, however, the orbit appears to rotate due to the rotating reference 
+% frame, even though the rotation itself is not directly visible. Eventually, as 
+% the spacecraft enters the Moon's gravitational field, it becomes captured and 
+% begins to orbit the Moon.
+%
+% One confusing aspect is that extending the simulation duration in Simulink 
+% does not consistently show the spacecraft being captured by the Moon, whereas 
+% plotting the results using ODE113 does. I was unable to determine the exact 
+% cause of this discrepancy, although the capture behavior intuitively seems 
+% like the correct physical outcome.
+%
+% I did not need to modify the Simulink model to produce these results, as I used 
+% the differential equations from Part One to model the system. The only significant 
+% challenge was constructing the array to store the X and Y coordinates in a form 
+% that was algebraically compatible, as implemented in line 112.
 %% Question 3 - Scalar equations
 
 % tspan = tspan;
