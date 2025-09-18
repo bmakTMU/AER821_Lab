@@ -148,6 +148,8 @@ r_moon = d_Luna-r0x; % initial distance from s/c to Moon
 
 Q3 = sim('Question3.slx', 'StopTime', num2str(5*T_sys));
 
+% [t, y] = ode113(@(t,y) scalarAccel(v0, r0, r_moon, d_Luna, Mu_Luna, r_earth, d_Earth, Mu_Earth, Omega), tspan, [0;0;0])
+
 posQ3 = Q3.posQ3.Data;
 velQ3 = Q3.velQ3.Data;
 
@@ -194,7 +196,7 @@ function dydt = crtbp_inertial(t, y, Mu_Earth, Mu_Luna, d_Earth, d_Luna, Omega)
 end
 
 % Scalar Eqns of Motion
-function a = accel(velocity, position, r_moon, d_Luna, Mu_Luna, r_earth, d_Earth, Mu_Earth, Omega)
+function a = scalarAccel(velocity, position, r_moon, d_Luna, Mu_Luna, r_earth, d_Earth, Mu_Earth, Omega)
 
     % Define variables
     
@@ -217,6 +219,6 @@ function a = accel(velocity, position, r_moon, d_Luna, Mu_Luna, r_earth, d_Earth
     
     az = -(Mu_Earth / r_earth^3)*z - (Mu_Luna / r_moon^3)*z;
     
-    a = [ax ay az];
+    a = [ax; ay; az];
 
 end
