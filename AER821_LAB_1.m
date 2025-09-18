@@ -149,7 +149,29 @@ grid on;                                                                    % Tu
 axis equal;                                                                 % Sets the units of both axis equal to eachother
 hold off;
 
-%%
+%% Question 3 - Scalar equations
+
+Q3 = sim('Question3.slx');
+
+posQ3 = Q3.posQ3.Data;
+velQ3 = Q3.velQ3.Data;
+
+figure;
+hold on;
+plot(E_Stationary(1), E_Stationary(2), 'bo', 'MarkerFaceColor', 'b');       % Plots the Earth
+plot(Luna_Stationary(1), Luna_Stationary(2), 'ko', 'MarkerFaceColor', 'k'); % Plots the Moon
+plot(posQ3(:,1), posQ3(:,2), 'r', 'LineWidth', 1.2);
+plot(0,0, 'k+');
+xlabel('X [m]');                                                            % Creates the x axis label
+ylabel('Y [m]');                                                            % Creates the y axis label
+legend('Earth', 'Moon', 'Spacecraft', 'Barycenter');                        % Creates the legend
+title('Scalar Equations in the Rotating Frame');                            % Creates the title
+grid on;                                                                    % Turns on the background grid on the plot
+axis equal;                                                                 % Sets the units of both axis equal to eachother
+hold off;
+
+
+%% Functions
 % Function: Equations of motion
 function dydt = crtbp_inertial(t, y, Mu_Earth, Mu_Luna, d_Earth, d_Luna, Omega)
 
@@ -172,3 +194,4 @@ function dydt = crtbp_inertial(t, y, Mu_Earth, Mu_Luna, d_Earth, d_Luna, Omega)
     dydt = [v; a];
 
 end
+ 

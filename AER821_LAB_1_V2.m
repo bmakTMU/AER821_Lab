@@ -1,6 +1,6 @@
 clear; clc; close all; 
 
-% Constants
+%% Constants
 G = 6.6742e-11; % gravitational constant [m^3/kg/s^2]
 M_Earth = 5.974e24; % mass of Earth [kg]
 M_Luna = 7.348e22; % mass of Moon [kg]
@@ -81,7 +81,7 @@ plot(xL1,0,'ro','MarkerFaceColor','r'); % L1
 legend('Barycenter','Earth orbit','Moon orbit','Spacecraft','Earth at t=0','Moon at t=0','L1');
 xlabel('X [m]'); 
 ylabel('Y [m]');
-title('CRTBP – One Lunar Period (Start at L1)');
+title('Q1: CRTBP – One Lunar Period (Start at L1)');
 axis equal; 
 grid on; 
 hold off;
@@ -91,7 +91,7 @@ hold off;
 % Redefine the time of the system to better display the orbit of the
 % spacecraft in the rotating frame
 
-tspan = tspan * 5;                                                                                    % Changes the time span to four lunar cycles
+tspan = tspan * 5;                      % Changes the time span to four lunar cycles
 [t, y] = ode113(@(t,y) crtbp_inertial(t, y, Mu_Earth, Mu_Luna, d_Earth, d_Luna, Omega), tspan, y0);   % Reruns the derivation of the x and y coordinates using the 5 cycles span
 
 % Define spacecraft position arrays and preallocate
@@ -133,7 +133,7 @@ plot(0, 0, 'k+');                                                           % Pl
 xlabel('X [m]');                                                            % Creates the x axis label
 ylabel('Y [m]');                                                            % Creates the y axis label
 legend('Earth', 'Moon', 'Spacecraft', 'Barycenter');                        % Creates the legend
-title('System Viewed Through The Rotating Frame');                          % Creates the title
+title('Q2: System Viewed Through The Rotating Frame');                          % Creates the title
 grid on;                                                                    % Turns on the background grid on the plot
 axis equal;                                                                 % Sets the units of both axis equal to eachother
 hold off;
@@ -141,33 +141,84 @@ hold off;
 
 %% Question 3 - Scalar equations
 
-r_earth = r0x - d_Earth; % initial distance from s/c to Earth
-r_moon = d_Luna-r0x; % initial distance from s/c to Moon
+% tspan = tspan;
+y0(5) = 0; % since the scalar equations are defined in the rotating frame, 
+            % initial velocity conditions need to be removed
 
 
+[t, y] = ode113(@(t,y) scalarAccel(t, y, d_Luna, Mu_Luna, d_Earth, Mu_Earth, Omega), tspan, y0);
 
-Q3 = sim('Question3.slx', 'StopTime', num2str(5*T_sys));
-
-% [t, y] = ode113(@(t,y) scalarAccel(v0, r0, r_moon, d_Luna, Mu_Luna, r_earth, d_Earth, Mu_Earth, Omega), tspan, [0;0;0])
-
-posQ3 = Q3.posQ3.Data;
-velQ3 = Q3.velQ3.Data;
-
+% Plotting Graph
 figure;
 hold on;
-plot(E_Stationary(1), E_Stationary(2), 'bo', 'MarkerFaceColor', 'b');       % Plots the Earth
+plot(E_Stationary(1), E_Stationary(2), 'bo', 'MarkerFaceColor', 'b'); % Plots the Earth
 plot(Luna_Stationary(1), Luna_Stationary(2), 'ko', 'MarkerFaceColor', 'k'); % Plots the Moon
 
-plot(posQ3(:,1), posQ3(:,2), 'r', 'LineWidth', 1.2);                        % Plot scalar eqns
+plot(y(:,1), y(:,2), 'r', 'LineWidth', 1.2); % Plot scalar eqns
+
+plot(0,0, 'k+'); % Barycenter
+xlabel('X [m]'); % Creates the x axis label
+ylabel('Y [m]'); % Creates the y axis label
+
+plot(y(1,1), y(1,2), 'rx', 'MarkerSize', 10, 'LineWidth', 2); % Initial Position
+
+if exist('X_SC_Rot','var') && exist('Y_SC_Rot','var')
+    plot(X_SC_Rot, Y_SC_Rot, 'g--','LineWidth',0.2);
+    legend('Earth','Moon','Scalar Path','Barycenter', 'Initial Position','Q2: Inertial→Rotating','Location','best');
+else
+    legend('Earth','Moon','Scalar Path','Barycenter', 'Initial Position','Location','best');
+end
+
+% legend('Earth', 'Moon', 'Spacecraft', 'Barycenter'); % Legend
+title('Q3: Scalar Equations in the Rotating Frame'); % Title
+
+grid on;axis equal;hold off;
+
+%% Question 4
+
+% set initial conditon perturbations
+
+px = 0;
+py = 0;
+pz = 0;
+
+vpx = -100;
+vpy = 0;
+vpz = 0;
+
+% Plot original scalar path
+figure;
+hold on;
+plot(E_Stationary(1), E_Stationary(2), 'bo', 'MarkerFaceColor', 'b'); % Plots the Earth
+plot(Luna_Stationary(1), Luna_Stationary(2), 'ko', 'MarkerFaceColor', 'k'); % Plots the Moon
+
+plot(y(:,1), y(:,2), 'r', 'LineWidth', 1.2); % Plot scalar eqns
+
+plot(0,0, 'k+'); % Barycenter
+xlabel('X [m]'); % Creates the x axis label
+ylabel('Y [m]'); % Creates the y axis label
+
+plot(y(1,1), y(1,2), 'rx', 'MarkerSize', 10, 'LineWidth', 2); % Initial Position
+
+% Perturb initial conditions vector
+y0 = [y0(1) + px; y0(2) + py; y0(3) + pz;
+    y0(4) + vpx; y0(5) + vpy; y0(6) + vpz];
+
+[t, y] = ode113(@(t,y4) scalarAccel(t, y4, d_Luna, Mu_Luna, d_Earth, Mu_Earth, Omega), tspan*5, y0);
+
+% Plot perturbed path
+
+plot(y(:,1), y(:,2), '--g', 'LineWidth', 1.2);                            % Plot scalar eqns
 
 plot(0,0, 'k+');                                                            % Barycenter
 xlabel('X [m]');                                                            % Creates the x axis label
 ylabel('Y [m]');                                                            % Creates the y axis label
-legend('Earth', 'Moon', 'Spacecraft', 'Barycenter');                        % Creates the legend
-title('Scalar Equations in the Rotating Frame');                            % Creates the title
+legend('Earth', 'Moon', 'Q3 Original Path', 'Barycenter', 'Initial Position', 'Perturbed Path');      % Creates the legend
+title('Original vs Perturbed Initial Conditions');                          % Creates the title
 grid on;                                                                    % Turns on the background grid on the plot
 axis equal;                                                                 % Sets the units of both axis equal to eachother
 hold off;
+
 
 
 %% Functions
@@ -196,29 +247,34 @@ function dydt = crtbp_inertial(t, y, Mu_Earth, Mu_Luna, d_Earth, d_Luna, Omega)
 end
 
 % Scalar Eqns of Motion
-function a = scalarAccel(velocity, position, r_moon, d_Luna, Mu_Luna, r_earth, d_Earth, Mu_Earth, Omega)
+function dadt = scalarAccel(~, Y, d_Luna, Mu_Luna, d_Earth, Mu_Earth, Omega)
 
-    % Define variables
-    
+   
     % position
-    x = position(1);
-    y = position(2);
-    z = position(3);
+    x = Y(1);
+    y = Y(2);
+    z = Y(3);
     
     % velocity
-    x_v = velocity(1);
-    y_v = velocity(2);
+    vx = Y(4);
+    vy = Y(5);
+    vz = Y(6);
+
+    % define distance to bodies
+
+    r_earth = sqrt( (x-d_Earth)^2 + y^2 + z^2);
+    r_moon = sqrt( (x-d_Luna)^2 + y^2 + z^2);
 
 
      
     % Function
     
-    ax = 2*Omega*y_v + (Omega^2)*x - (Mu_Earth / r_earth^3)*(x-d_Earth) - (Mu_Luna / r_moon^3)*(x-d_Luna);
+    ax = 2*Omega*vy + (Omega^2)*x - (Mu_Earth / r_earth^3)*(x - d_Earth) - (Mu_Luna / r_moon^3)*(x-d_Luna);
     
-    ay = -(Mu_Earth / r_earth^3)*y - (Mu_Luna / r_moon^3)*y + (Omega^2)*y - 2*Omega*x_v;
+    ay = -(Mu_Earth / r_earth^3)*y - (Mu_Luna / r_moon^3)*y + (Omega^2)*y - 2*Omega*vx;
     
     az = -(Mu_Earth / r_earth^3)*z - (Mu_Luna / r_moon^3)*z;
     
-    a = [ax; ay; az];
+    dadt = [vx; vy; vz; ax; ay; az];
 
 end
