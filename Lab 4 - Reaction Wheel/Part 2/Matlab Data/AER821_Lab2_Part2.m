@@ -37,7 +37,7 @@ speed10 = speed';
 speedVoltage10 = speedVoltage';
 speedTorque10 = speedTorque';
 
-%% Current plots
+%% Current (integral controller) plots
 
 % Current
 figure(1) 
@@ -48,7 +48,7 @@ for i=2:width(current5)
 end 
 xlabel('Time');
 ylabel('Current (A)');
-title('Time vs Current, 5 mNm');
+title('Current vs Time, 5 mNm');
 legend('Commanded Torque', "Load Cell Torque", "Computed Torque (from current)")
 grid on; hold off;
 
@@ -60,7 +60,7 @@ for i=2:width(current10)
 end 
 xlabel('Time');
 ylabel('Current (A)');
-title('Time vs Current, 10 mNm');
+title('Current vs Time, 10 mNm');
 legend('Commanded Torque', "Load Cell Torque", "Computed Torque (from current)")
 grid on; hold off;
 
@@ -72,7 +72,8 @@ hold on
 plot(currentVoltage5(:,1), currentVoltage5(:,2), 'LineWidth', 1.5);
 xlabel('Time');
 ylabel('Voltage (V)');
-title('Time vs Voltage, 5 mNm');
+title('Voltage vs Time, 5 mNm');
+legend()
 grid on; hold off;
 
 subplot(2,1,2)
@@ -80,7 +81,7 @@ hold on
 plot(currentVoltage10(:,1), currentVoltage10(:,2), 'LineWidth', 1.5);
 xlabel('Time');
 ylabel('Voltage (V)');
-title('Time vs Voltage, 10 mNm');
+title('Voltage vs Time, 10 mNm');
 grid on; hold off;
 
 % Torque
@@ -88,50 +89,29 @@ grid on; hold off;
 figure(3) 
 subplot(2,1,1)
 hold on
-for i=2:width(current5)
-    plot(current5(:,1), current5(:,i), 'LineWidth', 1.5);
+for i=2:width(currentTorqu5)
+    plot(currentTorqu5(:,1), currentTorqu5(:,i), 'LineWidth', 1.5);
 end 
 xlabel('Time');
-ylabel('Current (A)');
-title('Time vs Current, 5 mNm');
-legend('Commanded Torque', "Load Cell Torque", "Computed Torque (from current)")
+ylabel('Torque, Nm');
+title('Torque vs Time, 5 mNm');
+legend('Torque', 'Commanded Torque')
 grid on; hold off;
 
 
 subplot(2,1,2)
 hold on
-for i=2:width(current10)
-    plot(current10(:,1), current10(:,i), 'LineWidth', 1.5);
+for i=2:width(currentTorqu10)
+    plot(currentTorqu10(:,1), currentTorqu10(:,i), 'LineWidth', 1.5);
 end 
 xlabel('Time');
-ylabel('Current (A)');
-title('Time vs Current, 10 mNm');
-legend('Commanded Torque', "Load Cell Torque", "Computed Torque (from current)")
+ylabel('Torque, Nm');
+title('Torque vs Time, 10 mNm');
+legend('Torque', 'Commanded Torque')
 grid on; hold off;
 
 
-
-figure(3)
-subplot(2,1,1)
-hold on
-plot(currentTorqu5(:,1), currentTorqu5(:,2), 'LineWidth', 1.5);
-xlabel('Time');
-ylabel('Torque (Nm)');
-title('Time vs Torque, 5 mNm');
-grid on; hold off;
-
-subplot(2,1,2)
-hold on
-plot(currentTorqu10(:,1), currentTorqu10(:,2), 'LineWidth', 1.5);
-xlabel('Time');
-ylabel('Torque (Nm)');
-title('Time vs Torque, 10 mNm');
-grid on; hold off;
-
-
-
-
-%% Speed plots
+%% Speed Controller plots
 
 % Current
 figure(4) 
@@ -141,8 +121,8 @@ for i=2:width(speed5)
     plot(speed5(:,1), speed5(:,i), 'LineWidth', 1.5);
 end 
 xlabel('Time');
-ylabel('Current (A)');
-title('Time vs Current, 5 mNm');
+ylabel('Speed (RPM)');
+title('Speed vs Time, 5 mNm');
 legend('Commanded Torque', "Load Cell Torque", "Computed Torque (from speed)")
 grid on; hold off;
 
@@ -153,9 +133,9 @@ for i=2:width(speed10)
     plot(speed10(:,1), speed10(:,i), 'LineWidth', 1.5);
 end 
 xlabel('Time');
-ylabel('Current (A)');
-title('Time vs Current, 10 mNm');
-legend('Commanded Torque', "Load Cell Torque", "Computed Torque (from current)")
+ylabel('Speed (RPM)');
+title('Speed vs Time, 10 mNm');
+legend('Commanded Torque', "Load Cell Torque", "Computed Torque (from speed)")
 grid on; hold off;
 
 
@@ -166,7 +146,8 @@ hold on
 plot(speedVoltage5(:,1), speedVoltage5(:,2), 'LineWidth', 1.5);
 xlabel('Time');
 ylabel('Voltage (V)');
-title('Time vs Voltage, 5 mNm');
+title('Voltage vs Time, 5 mNm');
+legend()
 grid on; hold off;
 
 subplot(2,1,2)
@@ -174,23 +155,31 @@ hold on
 plot(speedVoltage10(:,1), speedVoltage10(:,2), 'LineWidth', 1.5);
 xlabel('Time');
 ylabel('Voltage (V)');
-title('Time vs Voltage, 10 mNm');
+title('Voltage vs Time, 10 mNm');
 grid on; hold off;
 
 % Torque
-figure(6)
+
+figure(6) 
 subplot(2,1,1)
 hold on
-plot(speedTorque5(:,1), speedTorque5(:,2), 'LineWidth', 1.5);
+for i=2:width(speedTorque5)
+    plot(speedTorque5(:,1), speedTorque5(:,i), 'LineWidth', 1.5);
+end 
 xlabel('Time');
-ylabel('Torque (Nm)');
-title('Time vs Torque, 5 mNm');
+ylabel('Torque, Nm');
+title('Torque vs Time, 5 mNm');
+legend('Torque', 'Commanded Torque')
 grid on; hold off;
+
 
 subplot(2,1,2)
 hold on
-plot(speedTorque10(:,1), speedTorque10(:,2), 'LineWidth', 1.5);
+for i=2:width(speedTorque10)
+    plot(speedTorque10(:,1), speedTorque10(:,i), 'LineWidth', 1.5);
+end 
 xlabel('Time');
-ylabel('Torque (Nm)');
-title('Time vs Torque, 10 mNm');
+ylabel('Torque, Nm');
+title('Torque vs Time, 10 mNm');
+legend('Torque', 'Commanded Torque')
 grid on; hold off;
