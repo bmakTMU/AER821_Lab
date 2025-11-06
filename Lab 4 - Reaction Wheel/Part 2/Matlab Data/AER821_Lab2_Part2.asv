@@ -73,6 +73,7 @@ plot(currentVoltage5(:,1), currentVoltage5(:,2), 'LineWidth', 1.5);
 xlabel('Time');
 ylabel('Voltage (V)');
 title('Voltage vs Time, 5 mNm');
+legend()
 grid on; hold off;
 
 subplot(2,1,2)
@@ -134,7 +135,7 @@ end
 xlabel('Time');
 ylabel('Speed (RPM)');
 title('Speed vs Time, 10 mNm');
-legend('Commanded RPM', "Load Cell RPM", "Computed RPM")
+legend('Commanded Torque', "Load Cell Torque", "Computed Torque")
 grid on; hold off;
 
 
@@ -146,6 +147,7 @@ plot(speedVoltage5(:,1), speedVoltage5(:,2), 'LineWidth', 1.5);
 xlabel('Time');
 ylabel('Voltage (V)');
 title('Voltage vs Time, 5 mNm');
+legend()
 grid on; hold off;
 
 subplot(2,1,2)
