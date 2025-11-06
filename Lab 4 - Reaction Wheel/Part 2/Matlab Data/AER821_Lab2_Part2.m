@@ -181,3 +181,39 @@ ylabel('Torque, Nm');
 title('Torque vs Time, 10 mNm');
 legend('Torque', 'Commanded Torque')
 grid on; hold off;
+
+%% Part F - Stiction
+
+% load initial bias
+load speedController_partF_withInitialBias.mat
+F.bias = speedData';
+
+load speedController_partF_zero_crossing.mat
+F.zero = speedData';
+
+% plot bias vs zero
+
+% bias
+figure(7) 
+subplot(2,1,1)
+hold on
+for i=2:width(F.bias)
+    plot(F.bias(:,1), F.bias(:,i), 'LineWidth', 1.5);
+end 
+xlabel('Time');
+ylabel('Torque, Nm');
+title('Torque Response from Biased Wheel Speed');
+legend('Torque', 'Commanded Torque')
+grid on; hold off;
+
+% zero
+subplot(2,1,2)
+hold on
+for i=2:width(F.zero)
+    plot(F.zero(:,1), F.zero(:,i), 'LineWidth', 1.5);
+end 
+xlabel('Time');
+ylabel('Torque, Nm');
+title('Torque Response from Zero Wheel Speed');
+legend('Torque', 'Commanded Torque')
+grid on; hold off;

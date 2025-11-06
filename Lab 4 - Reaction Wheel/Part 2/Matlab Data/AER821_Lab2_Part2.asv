@@ -73,7 +73,6 @@ plot(currentVoltage5(:,1), currentVoltage5(:,2), 'LineWidth', 1.5);
 xlabel('Time');
 ylabel('Voltage (V)');
 title('Voltage vs Time, 5 mNm');
-legend()
 grid on; hold off;
 
 subplot(2,1,2)
@@ -135,7 +134,7 @@ end
 xlabel('Time');
 ylabel('Speed (RPM)');
 title('Speed vs Time, 10 mNm');
-legend('Commanded Torque', "Load Cell Torque", "Computed Torque")
+legend('Commanded RPM', "Load Cell RPM", "Computed RPM")
 grid on; hold off;
 
 
@@ -147,7 +146,6 @@ plot(speedVoltage5(:,1), speedVoltage5(:,2), 'LineWidth', 1.5);
 xlabel('Time');
 ylabel('Voltage (V)');
 title('Voltage vs Time, 5 mNm');
-legend()
 grid on; hold off;
 
 subplot(2,1,2)
@@ -181,5 +179,27 @@ end
 xlabel('Time');
 ylabel('Torque, Nm');
 title('Torque vs Time, 10 mNm');
+legend('Torque', 'Commanded Torque')
+grid on; hold off;
+
+%% Part F - Stiction
+
+% load initial bias
+load speedController_partF_withInitialBias.mat
+F.bias = speedData';
+
+load speedController_partF_zero_crossing.mat
+F.zero = speedData';
+
+% plot bias vs zero
+figure(7) 
+subplot(2,1,1)
+hold on
+for i=2:width(F.bias)
+    plot(speedTorque5(:,1), speedTorque5(:,i), 'LineWidth', 1.5);
+end 
+xlabel('Time');
+ylabel('Torque, Nm');
+title('Torque vs Time, 5 mNm');
 legend('Torque', 'Commanded Torque')
 grid on; hold off;
